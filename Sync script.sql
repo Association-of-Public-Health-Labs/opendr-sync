@@ -15,25 +15,18 @@ BEGIN
    IF @SyncStatus = 'INSERT'
    BEGIN
        -- Data insertion
-	   INSERT INTO LDR.OpenLDRData.dbo.Requests
-	   SELECT * FROM OpenLDRData.dbo.Requests WHERE RequestID = @RequestID AND OBRSetID = @OBRSetID
+	   EXEC OpenLDRData.dbo.insertAndUpdateIntoRequests @RequestID, @OBRSetID, 'INSERT'
 	   DELETE FROM OpenLDRData.dbo.SyncTable WHERE RequestID = @RequestID AND OBRSetID = @OBRSetID
    END
    ELSE IF @SyncStatus = 'UPDATE'
    BEGIN
-       UPDATE LDR.OpenLDRData.dbo.Requests 
-	   SET LIMSPanelCode = loc.LIMSPanelCode,
-	       SpecimenDatetime = loc.SpecimenDatetime,
-		   ReceivedDateTime = loc.ReceivedDateTime
-	   FROM LDR.OpenLDRData.dbo.Requests AS central
-	   JOIN OpenLDRData.dbo.Requests AS loc ON loc.RequestID = central.RequestID AND loc.OBRSetID = central.OBRSetID
-	    
+	   EXEC OpenLDRData.dbo.insertAndUpdateIntoRequests @RequestID, @OBRSetID, 'UPDATE'
        DELETE FROM OpenLDRData.dbo.SyncTable WHERE RequestID = @RequestID AND OBRSetID = @OBRSetID
    END 
    ELSE
    BEGIN
        -- Delete records
-	   DELETE FROM LDR.OpenLDRData.dbo.Requests WHERE RequestID = @RequestID AND OBRSetID = @OBRSetID 
+	   EXEC OpenLDRData.dbo.deleteIntoTableRequests @RequestID, @OBRSetID
 	   DELETE FROM OpenLDRData.dbo.SyncTable WHERE RequestID = @RequestID AND OBRSetID = @OBRSetID
    END
 
